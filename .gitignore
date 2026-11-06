@@ -1,2 +1,9 @@
 build*/
 .vs/
+.vscode/
+*.o
+*.a
+a.out
+core
+core.*
+vgcore.*
