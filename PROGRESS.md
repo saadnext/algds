@@ -7,20 +7,20 @@
 - Repo: github.com/saadnext/algds (public), branch `main`, remote `origin`
 
 ## Current position
-- Phase 0, Step 0.5: gdb basics (IN PROGRESS)
-- Then: 0.6 function pointers mini-lesson, 0.7 API / error / allocator design
+- Phase 1, Step 1.1: dynamic array (vector) core: create/destroy/push/get/size (IN PROGRESS)
 
 ## Passed steps
 - 0.1 Repo, git, GitHub, editor config (PASS)
 - 0.2 CMake: warnings, -std=c11, sanitizer option (PASS)
 - 0.3 Test harness + ctest (PASS)
 - 0.4 GitHub Actions CI (PASS)
+- 0.5 gdb basics (PASS, reduced scope: crash hunting with bt/frame/print; rest learned when needed)
 
 ## Weak topics / concepts I struggled with
 - Pointer-to-pointer (shaky)
 - realloc misuse (shaky)
-- Function pointers (never used)
-- Debuggers (never used)
+- Function pointers (never used; teach right before first need)
+- Debuggers (used once: run, bt, frame, print)
 - Reading which flag a GCC warning comes from (the [-Wxxx] bracket)
 - Argument order in expected/actual style macros (swapped once)
 - Build dir names are local; CI uses its own (build vs build-deb mix-up)
@@ -35,6 +35,7 @@
 - Why ASan and Valgrind can't run together (both intercept malloc/free)
 - push vs pull_request triggers: what each protects
 - Where CMake puts executables (build dir of the CMakeLists that defines them)
+- In a backtrace, the first frame in your own code is where to look (not the libc frame)
 
 ## Decisions log
 - Build system: CMake + Ninja generator
@@ -57,3 +58,5 @@
 - Commits: Conventional Commits, message text supplied by mentor
 - Repo is public: mentor can read by URL (Actions logs need login, so paste failing logs)
 - Optional/undecided: warnings on examples, -Wstrict-prototypes
+- PACE RULE: learn tools just in time. No standalone tooling drills; function pointers and allocator hooks are taught right before their first use; API/error design is decided inside each structure's step.
+- Review rule: mentor gives ONE complete issue list per review round, no new items later.
