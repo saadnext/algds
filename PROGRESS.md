@@ -7,11 +7,12 @@
 - Repo: github.com/saadnext/algds (public), branch `main`, remote `origin`
 
 ## Current position
-- Phase 0, Step 0.3: Test harness + ctest (IN PROGRESS)
+- Phase 0, Step 0.4: GitHub Actions CI (IN PROGRESS)
 
 ## Passed steps
 - 0.1 Repo, git, GitHub, editor config (PASS)
 - 0.2 CMake: warnings, -std=c11, sanitizer option (PASS)
+- 0.3 Test harness + ctest (PASS)
 
 ## Weak topics / concepts I struggled with
 - Pointer-to-pointer (shaky)
@@ -19,17 +20,21 @@
 - Function pointers (never used)
 - Debuggers (never used)
 - Reading which flag a GCC warning comes from (the [-Wxxx] bracket)
+- Argument order in expected/actual style macros (swapped once)
 
 ## Review queue (spaced repetition)
 - Git's three places (working folder / local history / GitHub) and which one is a backup
 - Why .clangd needs a configured build dir (compile_commands.json) on a fresh clone
 - PRIVATE vs PUBLIC in target_link_libraries / target_include_directories
+- Why do { } while (0) in multi-statement macros
+- Test exit code -> how ctest decides pass/fail
+- REQUIRE's hidden `return`: only valid in int-returning functions with `failed` in scope
 
 ## Decisions log
 - Build system: CMake + Ninja generator
 - Static library `algds`, opaque structs
 - Symbol prefix `algds_`, macros `ALGDS_`, include path `<algds/...>`
-- Folder names: include/algds/, src/, benchmark/, docs/, examples/, tests/ (created in 0.3)
+- Folder names: include/algds/, src/, benchmark/, docs/, examples/, tests/
 - Build dirs: build-deb, build-rel, build-asan, build-clang (all ignored via build*/)
 - .clangd points at build-deb
 - Option ALGDS_SANITIZE enables address+undefined (-g -O1) via INTERFACE target project_sanitizers
@@ -38,7 +43,10 @@
 - C_EXTENSIONS OFF so -std=c11 is strict (not gnu11)
 - Header contracts live in .h files, not .c files
 - .vscode/ ignored (personal settings); .clangd and .clang-format committed
-- Testing: hand-made C harness + ctest; no Catch2 (C++). Revisit Unity/cmocka later
+- Testing: hand-made harness in tests/test_harness.h (CHECK, CHECK_STR_EQ, REQUIRE, TEST_STATUS)
+- Test counter is a local `int failed` in each test's main (no extern/global); revisit when tests are split into functions
+- Harness header owns <stdio.h>/<string.h>; test files rely on it
+- Revisit C frameworks (Unity/cmocka) later; no Catch2 (C++)
 - CI: GitHub Actions in Step 0.4 (gcc/clang matrix, ASan/UBSan, Valgrind)
 - Commits: Conventional Commits, message text supplied by mentor
 - Repo is public: mentor can read by URL
