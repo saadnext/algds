@@ -7,12 +7,14 @@
 - Repo: github.com/saadnext/algds (public), branch `main`, remote `origin`
 
 ## Current position
-- Phase 0, Step 0.4: GitHub Actions CI (IN PROGRESS)
+- Phase 0, Step 0.5: gdb basics (IN PROGRESS)
+- Then: 0.6 function pointers mini-lesson, 0.7 API / error / allocator design
 
 ## Passed steps
 - 0.1 Repo, git, GitHub, editor config (PASS)
 - 0.2 CMake: warnings, -std=c11, sanitizer option (PASS)
 - 0.3 Test harness + ctest (PASS)
+- 0.4 GitHub Actions CI (PASS)
 
 ## Weak topics / concepts I struggled with
 - Pointer-to-pointer (shaky)
@@ -21,6 +23,7 @@
 - Debuggers (never used)
 - Reading which flag a GCC warning comes from (the [-Wxxx] bracket)
 - Argument order in expected/actual style macros (swapped once)
+- Build dir names are local; CI uses its own (build vs build-deb mix-up)
 
 ## Review queue (spaced repetition)
 - Git's three places (working folder / local history / GitHub) and which one is a backup
@@ -29,6 +32,9 @@
 - Why do { } while (0) in multi-statement macros
 - Test exit code -> how ctest decides pass/fail
 - REQUIRE's hidden `return`: only valid in int-returning functions with `failed` in scope
+- Why ASan and Valgrind can't run together (both intercept malloc/free)
+- push vs pull_request triggers: what each protects
+- Where CMake puts executables (build dir of the CMakeLists that defines them)
 
 ## Decisions log
 - Build system: CMake + Ninja generator
@@ -38,16 +44,16 @@
 - Build dirs: build-deb, build-rel, build-asan, build-clang (all ignored via build*/)
 - .clangd points at build-deb
 - Option ALGDS_SANITIZE enables address+undefined (-g -O1) via INTERFACE target project_sanitizers
-- Warnings in INTERFACE target project_warnings, linked PRIVATE to the library
+- Option ENABLE_PROJECT_WARNINGS (default ON); flags live in INTERFACE target project_warnings, linked PRIVATE to the library
 - Include dir is PUBLIC; TODO later: $<BUILD_INTERFACE:...> before `install`
 - C_EXTENSIONS OFF so -std=c11 is strict (not gnu11)
 - Header contracts live in .h files, not .c files
 - .vscode/ ignored (personal settings); .clangd and .clang-format committed
 - Testing: hand-made harness in tests/test_harness.h (CHECK, CHECK_STR_EQ, REQUIRE, TEST_STATUS)
 - Test counter is a local `int failed` in each test's main (no extern/global); revisit when tests are split into functions
-- Harness header owns <stdio.h>/<string.h>; test files rely on it
 - Revisit C frameworks (Unity/cmocka) later; no Catch2 (C++)
-- CI: GitHub Actions in Step 0.4 (gcc/clang matrix, ASan/UBSan, Valgrind)
+- CI: .github/workflows/ci.yml; push + PR to main; matrix {gcc,clang} x {Debug+ASan/UBSan, Release}; separate Valgrind job (Debug, no sanitizers, ./build/test_version)
+- actions/checkout@v7 works (fallback @v6 if it ever fails)
 - Commits: Conventional Commits, message text supplied by mentor
-- Repo is public: mentor can read by URL
+- Repo is public: mentor can read by URL (Actions logs need login, so paste failing logs)
 - Optional/undecided: warnings on examples, -Wstrict-prototypes
