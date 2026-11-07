@@ -25,9 +25,11 @@ if(ALGDS_SANITIZE)
     message(STATUS "Sanitizers are ENABLED")
 endif()
 
+option(ENABLE_PROJECT_WARNINGS "Enable strict compiler warnings" ON)
 add_library(project_warnings INTERFACE)
-
-target_compile_options(project_warnings INTERFACE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+if(ENABLE_PROJECT_WARNINGS)
+    target_compile_options(project_warnings INTERFACE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+endif()
 
 add_library(algds STATIC
   src/version.c
