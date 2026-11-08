@@ -33,6 +33,7 @@ endif()
 
 add_library(algds STATIC
   src/version.c
+  src/vector.c
 )
 target_include_directories(algds PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(algds PRIVATE project_warnings)
@@ -45,7 +46,13 @@ add_executable(test_version tests/test_version.c)
 target_link_libraries(test_version PRIVATE algds project_warnings)
 add_test(NAME test_version COMMAND test_version)
 
+add_executable(test_vector tests/test_vector.c)
+target_link_libraries(test_vector PRIVATE algds project_warnings)
+add_test(NAME test_vector COMMAND test_vector)
+
+
 if(ALGDS_SANITIZE)
     target_link_libraries(algds PRIVATE project_sanitizers)
     target_link_libraries(test_version PRIVATE project_sanitizers)
+    target_link_libraries(test_vector PRIVATE project_sanitizers)
 endif()

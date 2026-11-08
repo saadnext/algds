@@ -7,7 +7,7 @@
 - Repo: github.com/saadnext/algds (public), branch `main`, remote `origin`
 
 ## Current position
-- Phase 1, Step 1.1: dynamic array (vector) core: create/destroy/push/get/size (IN PROGRESS)
+- Phase 1, Step 1.2: vector extras (pop, reserve, allocator hooks, function pointers) (NOT STARTED)
 
 ## Passed steps
 - 0.1 Repo, git, GitHub, editor config (PASS)
@@ -15,15 +15,18 @@
 - 0.3 Test harness + ctest (PASS)
 - 0.4 GitHub Actions CI (PASS)
 - 0.5 gdb basics (PASS, reduced scope: crash hunting with bt/frame/print; rest learned when needed)
+- 1.1 Vector core: create/destroy/push/get/size (PASS)
 
 ## Weak topics / concepts I struggled with
-- Pointer-to-pointer (shaky)
-- realloc misuse (shaky)
+- Pointer-to-pointer (improving: understood create/destroy/push distinction; recheck in 1.2)
+- realloc misuse (fixed in push via tmp + local new_capacity; keep reviewing)
 - Function pointers (never used; teach right before first need)
 - Debuggers (used once: run, bt, frame, print)
 - Reading which flag a GCC warning comes from (the [-Wxxx] bracket)
 - Argument order in expected/actual style macros (swapped once)
 - Build dir names are local; CI uses its own (build vs build-deb mix-up)
+- Checking the right variable after malloc (*out vs out)
+- Writing header contracts (mentor supplied the model in 1.1; write them yourself in 1.2)
 
 ## Review queue (spaced repetition)
 - Git's three places (working folder / local history / GitHub) and which one is a backup
@@ -36,6 +39,10 @@
 - push vs pull_request triggers: what each protects
 - Where CMake puts executables (build dir of the CMakeLists that defines them)
 - In a backtrace, the first frame in your own code is where to look (not the libc frame)
+- When does a function need `**`: only when it must change the caller's pointer variable itself (create yes; destroy-by-value, push, get no)
+- Overflow check form: test `a > SIZE_MAX / b` BEFORE multiplying; checking after is too late
+- Why doubling is O(n) total copying while fixed +k is O(n^2)
+- Passing tests do not prove correctness: R1-R4 were invisible to the test suite
 
 ## Decisions log
 - Build system: CMake + Ninja generator
@@ -60,3 +67,18 @@
 - Optional/undecided: warnings on examples, -Wstrict-prototypes
 - PACE RULE: learn tools just in time. No standalone tooling drills; function pointers and allocator hooks are taught right before their first use; API/error design is decided inside each structure's step.
 - Review rule: mentor gives ONE complete issue list per review round, no new items later.
+- Error style: one enum `algds_status` in include/algds/error.h {OK, ERR_INVALID_ARG, ERR_NOMEM, ERR_RANGE}; overflow reports NOMEM
+- Vector: opaque handle, elem stored by value (void* + elem_size), starts at capacity 0, first growth to 4, then x2, clamped to SIZE_MAX / elem_size
+- create(algds_vec **out, size_t elem_size): status return, *out = NULL on failure when out non-NULL
+- destroy(algds_vec **v): frees and sets *v = NULL; NULL or *v == NULL is a no-op (option B chosen by me)
+- get copies into a caller buffer (no pointer into storage); out of range -> ALGDS_ERR_RANGE
+- size(NULL) == 0, documented
+- Header docs pattern: purpose, params, returns per status code, notes (ownership, complexity); document promises, not implementation
+
+## Notes for later
+- Push of an element that points into the same vector (realloc may move it before memcpy): decide when adding pointer access in 1.2
+- Possible `algds_vec_at` returning a pointer (faster, but invalidated by push)
+- Dead `!v->data` check in get; duplicate error.h include in vector.c (optional cleanup)
+- Out-of-memory paths (create malloc failure, push realloc failure) untestable until allocator hooks in 1.2
+- Possible overflow helper shared by push/reserve
+- Revisit opaque handle vs init/deinit with benchmark numbers in Phase 10
