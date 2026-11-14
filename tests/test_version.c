@@ -1,8 +1,7 @@
 #include "test_harness.h"
 #include <algds/version.h>
 
-int main(void) {
-    int failed = 0;
+static void algds_test_version(void) {
     const char *version_call1 = algds_version();
     const char *expected_version = "0.1.0";
 
@@ -13,6 +12,9 @@ int main(void) {
 
     const char *version_call2 = algds_version();
     CHECK(version_call1 == version_call2);
+}
 
+int main(void) {
+    algds_test_version();
     return TEST_STATUS;
 }

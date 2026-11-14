@@ -15,25 +15,26 @@ endif()
 option(ALGDS_SANITIZE "Enable Address and Undefined Behavior sanitizers" OFF)
 
 if(ALGDS_SANITIZE)
-    # 2. Create the interface target
-    add_library(project_sanitizers INTERFACE)
+  # 2. Create the interface target
+  add_library(project_sanitizers INTERFACE)
 
-    # 3. Add compiler and linker flags
-    target_compile_options(project_sanitizers INTERFACE -fsanitize=address,undefined -g -O1)
-    target_link_options(project_sanitizers INTERFACE -fsanitize=address,undefined)
-    
-    message(STATUS "Sanitizers are ENABLED")
+  # 3. Add compiler and linker flags
+  target_compile_options(project_sanitizers INTERFACE -fsanitize=address,undefined -g -O1)
+  target_link_options(project_sanitizers INTERFACE -fsanitize=address,undefined)
+
+  message(STATUS "Sanitizers are ENABLED")
 endif()
 
 option(ENABLE_PROJECT_WARNINGS "Enable strict compiler warnings" ON)
 add_library(project_warnings INTERFACE)
 if(ENABLE_PROJECT_WARNINGS)
-    target_compile_options(project_warnings INTERFACE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
+  target_compile_options(project_warnings INTERFACE -Wall -Wextra -Wpedantic -Wconversion -Wshadow)
 endif()
 
 add_library(algds STATIC
   src/version.c
   src/vector.c
+  src/allocator.c
 )
 target_include_directories(algds PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include)
 target_link_libraries(algds PRIVATE project_warnings)
@@ -52,7 +53,7 @@ add_test(NAME test_vector COMMAND test_vector)
 
 
 if(ALGDS_SANITIZE)
-    target_link_libraries(algds PRIVATE project_sanitizers)
-    target_link_libraries(test_version PRIVATE project_sanitizers)
-    target_link_libraries(test_vector PRIVATE project_sanitizers)
+  target_link_libraries(algds PRIVATE project_sanitizers)
+  target_link_libraries(test_version PRIVATE project_sanitizers)
+  target_link_libraries(test_vector PRIVATE project_sanitizers)
 endif()

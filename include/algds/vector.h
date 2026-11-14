@@ -1,6 +1,7 @@
 #ifndef ALGDS_VECTOR_H
 #define ALGDS_VECTOR_H
 
+#include <algds/allocator.h>
 #include <algds/error.h>
 #include <stddef.h>
 
@@ -41,6 +42,35 @@ typedef struct algds_vec algds_vec;
  * @note Complexity: O(1).
  */
 algds_status algds_vec_create(algds_vec **out, size_t elem_size);
+
+/**
+ * @brief Creates an empty vector with a custom allocator.
+ *
+ * @param[out] out        Receives the new vector. Must not be NULL.
+ * @param[in]  elem_size  Size in bytes of one element. Must be > 0.
+ * @param[in]  allocator  Memory functions to use, or NULL for the default
+ *                        allocator. If non-NULL, all three function pointers
+ *                        must be non-NULL.
+ *
+ * @return ALGDS_OK             Success. `*out` is a new vector with size 0.
+ * @return ALGDS_ERR_INVALID_ARG `out` is NULL (nothing is written), or
+ *                              `elem_size` is 0 (`*out` is set to NULL).
+ * @return ALGDS_ERR_NOMEM      Allocation failed. `*out` is set to NULL.
+ *
+ * @note Ownership: the caller owns the vector and must release it with
+ *       algds_vec_destroy().
+ * @note Whenever `out` is non-NULL, `*out` is either a valid vector or NULL
+ *       afterwards, never garbage.
+ *
+ * @note The vector uses this allocator for its handle and its element
+ *       storage, and releases both with it in algds_vec_destroy().
+ * @note The vector keeps a copy of `*allocator`, so the caller's struct may
+ *       go away. Whatever `allocator->ctx` points at must outlive the vector.
+ *
+ * @note Complexity: O(1).
+ */
+algds_status algds_vec_create_ex(algds_vec **out, size_t elem_size,
+                                 const algds_allocator *allocator);
 
 /**
  * @brief Destroys a vector and sets the caller's pointer to NULL.

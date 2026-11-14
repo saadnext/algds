@@ -1,6 +1,6 @@
+#include <algds/allocator.h>
 #include <algds/vector.h>
 #include <stdint.h>
-#include <stdlib.h>
 #include <string.h>
 
 struct algds_vec {
@@ -8,9 +8,15 @@ struct algds_vec {
     size_t size;
     size_t capacity;
     size_t elem_size;
+    algds_allocator allocator;
 };
 
 algds_status algds_vec_create(algds_vec **out, size_t elem_size) {
+    return algds_vec_create_ex(out, elem_size, NULL);
+}
+
+algds_status algds_vec_create_ex(algds_vec **out, size_t elem_size,
+                                 const algds_allocator *allocator) {
     if (out == NULL) {
         return ALGDS_ERR_INVALID_ARG;
     }
@@ -18,21 +24,27 @@ algds_status algds_vec_create(algds_vec **out, size_t elem_size) {
         *out = NULL;
         return ALGDS_ERR_INVALID_ARG;
     }
-    *out = (algds_vec *)malloc(sizeof(algds_vec));
-    if (!*out)
+    algds_allocator allctr = allocator == NULL ? algds_default_allocator() : *allocator;
+    algds_vec *v = allctr.alloc_fn(allctr.ctx, sizeof(*v));
+    if (!v) {
+        *out = NULL;
         return ALGDS_ERR_NOMEM;
-    (*out)->data = NULL;
-    (*out)->size = 0;
-    (*out)->capacity = 0;
-    (*out)->elem_size = elem_size;
+    }
+    v->data = NULL;
+    v->size = 0;
+    v->capacity = 0;
+    v->elem_size = elem_size;
+    v->allocator = allctr;
+    *out = v;
     return ALGDS_OK;
 }
 
 void algds_vec_destroy(algds_vec **v) {
     if (!v || !*v)
         return;
-    free((*v)->data);
-    free(*v);
+    algds_allocator allocator = (*v)->allocator;
+    allocator.free_fn(allocator.ctx, (*v)->data);
+    allocator.free_fn(allocator.ctx, *v);
     *v = NULL;
 }
 
@@ -51,7 +63,8 @@ algds_status algds_vec_push(algds_vec *v, const void *elem) {
         else
             new_capacity *= 2;
         new_capacity = new_capacity > max_cap ? max_cap : new_capacity;
-        void *tmp_data = (void *)realloc(v->data, v->elem_size * new_capacity);
+        void *tmp_data =
+            v->allocator.realloc_fn(v->allocator.ctx, v->data, v->elem_size * new_capacity);
         if (!tmp_data)
             return ALGDS_ERR_NOMEM;
         v->data = tmp_data;
@@ -68,8 +81,6 @@ algds_status algds_vec_get(const algds_vec *v, size_t i, void *out) {
         return ALGDS_ERR_INVALID_ARG;
     if (i >= v->size)
         return ALGDS_ERR_RANGE;
-    if (!v->data)
-        return ALGDS_ERR_INVALID_ARG;
     unsigned char *src = (unsigned char *)v->data + i * v->elem_size;
     memcpy(out, src, v->elem_size);
     return ALGDS_OK;

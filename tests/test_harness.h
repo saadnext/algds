@@ -4,17 +4,17 @@
 #include <stdio.h>  /* IWYU pragma: keep */
 #include <string.h> /* IWYU pragma: keep */
 
+static int tg_test_failures = 0;
+
 /**
- * @brief Evaluates the `failed` counter and returns the appropriate process exit code.
- * @note Requires a valid `int failed` variable in scope.
- *       Returns 0 (Success) if no failures occurred, or 1 (Failure) if any check failed.
+ * @brief Evaluates the `tg_test_failures` counter and returns the appropriate process exit code.
+ * @note Returns 0 (Success) if no failures occurred, or 1 (Failure) if any check failed.
  */
-#define TEST_STATUS (failed > 0 ? 1 : 0)
+#define TEST_STATUS (tg_test_failures > 0 ? 1 : 0)
 
 /**
  * @brief Asserts that a condition is true.
- * @note Requires a mutable `int failed` variable to be defined within the calling scope.
- *       This variable will be incremented by 1 if the assertion fails.
+ * @note This variable `tg_test_failures` will be incremented by 1 if the assertion fails.
  *
  * @param cond The boolean expression to evaluate.
  */
@@ -23,28 +23,26 @@
         if (!(cond)) {                                                                             \
             fprintf(stderr, "CHECK failed at %s:%d\n", __FILE__, __LINE__);                        \
             fprintf(stderr, "  Expression: %s\n", #cond);                                          \
-            failed++;                                                                              \
+            tg_test_failures++;                                                                    \
         }                                                                                          \
     } while (0)
 
 /**
  * @brief Asserts a critical condition is true. Aborts the current function on failure.
- * @note Requires a mutable `int failed` variable in scope.
  */
 #define REQUIRE(cond)                                                                              \
     do {                                                                                           \
         if (!(cond)) {                                                                             \
             fprintf(stderr, "REQUIRE failed (FATAL) at %s:%d\n", __FILE__, __LINE__);              \
             fprintf(stderr, "  Expression: %s\n", #cond);                                          \
-            failed++;                                                                              \
-            return TEST_STATUS; /* Bails out immediately, preserving the failure state */          \
+            tg_test_failures++;                                                                    \
+            return; /* Bails out immediately, preserving the failure state */                      \
         }                                                                                          \
     } while (0)
 
 /**
  * @brief Asserts that two C-strings are structurally equal.
- * @note Requires a mutable `int failed` variable to be defined within the calling scope.
- *       This variable will be incremented by 1 if the assertion fails.
+ * @note This variable `tg_test_failures` will be incremented by 1 if the assertion fails.
  * @note Uses ultra-unique suffixes to entirely eliminate the risk of -Wshadow variable collision.
  *
  * @param a The expected string (handles NULL safely).
@@ -59,13 +57,13 @@
                 fprintf(stderr, "CHECK_STR_EQ failed at %s:%d\n", __FILE__, __LINE__);             \
                 fprintf(stderr, "  Expected: %s\n", str_a_cseq_7x8 ? str_a_cseq_7x8 : "NULL");     \
                 fprintf(stderr, "  Actual:   %s\n", str_b_cseq_7x8 ? str_b_cseq_7x8 : "NULL");     \
-                failed++;                                                                          \
+                tg_test_failures++;                                                                \
             }                                                                                      \
         } else if (strcmp(str_a_cseq_7x8, str_b_cseq_7x8) != 0) {                                  \
             fprintf(stderr, "CHECK_STR_EQ failed at %s:%d\n", __FILE__, __LINE__);                 \
             fprintf(stderr, "  Expected: \"%s\"\n", str_a_cseq_7x8);                               \
             fprintf(stderr, "  Actual:   \"%s\"\n", str_b_cseq_7x8);                               \
-            failed++;                                                                              \
+            tg_test_failures++;                                                                    \
         }                                                                                          \
                                                                                                    \
     } while (0)
